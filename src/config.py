@@ -10,6 +10,6 @@ DEFAULT_AI_PAUSE_SECONDS = 0.5
 WAIT_FOR_USER_ON_THEIR_LINES = True
 
 # Voice settings for TTS
-TTS_VOICE_NAME = None  # 'english-us'
-TTS_RATE = None        # e.g., 150 words per minute
-TTS_VOLUME = None      # 0.0 to 1.0
+TTS_VOICE_NAME = 'english-us'  # 'english-us'
+TTS_RATE = 80        # e.g., 150 words per minute
+TTS_VOLUME = 0.7      # 0.0 to 1.0
