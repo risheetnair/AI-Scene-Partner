@@ -1,13 +1,11 @@
 """
-Playback logic using text-to-speech and user prompts.
-
-This is where the "scene partner" comes alive.
+Playback logic using system TTS (`say` on macOS) and user prompts.
 """
 
 from typing import List
 import time
-
-import pyttsx3
+import subprocess
+import shlex
 
 from .models import PlayStep
 from .config import (
@@ -15,41 +13,41 @@ from .config import (
     WAIT_FOR_USER_ON_THEIR_LINES,
     TTS_VOICE_NAME,
     TTS_RATE,
-    TTS_VOLUME,
+    TTS_VOLUME,  # not used with `say` but kept for future
 )
 
 
-def init_tts_engine() -> pyttsx3.Engine:
+def init_tts_engine():
     """
-    Initialize and configure the pyttsx3 engine.
+    Placeholder to match previous interface.
+    With system `say`, we don't need an engine object.
     """
-    engine = pyttsx3.init()
-    if TTS_RATE is not None:
-        engine.setProperty("rate", TTS_RATE)
-
-    if TTS_VOLUME is not None:
-        engine.setProperty("volume", TTS_VOLUME)
-
-    if TTS_VOICE_NAME is not None:
-        for voice in engine.getProperty("voices"):
-            if TTS_VOICE_NAME.lower() in voice.name.lower():
-                engine.setProperty("voice", voice.id)
-                break
-
-    return engine
+    return None
 
 
-def speak_line(engine: pyttsx3.Engine, text: str) -> None:
+def speak_line(engine, text: str) -> None:
     """
-    Use the TTS engine to speak the given text.
+    Use macOS `say` command to speak the given text.
 
-    TODO:
-        - Call engine.say(text)
-        - Call engine.runAndWait()
+    - If TTS_VOICE_NAME is set, we pass `-v <voice>`
+    - If TTS_RATE is set, we pass `-r <rate>` (roughly words per minute)
     """
-    engine.say(text)
-    engine.runAndWait()
-    
+    if not text:
+        return
+
+    cmd = ["say"]
+
+    if TTS_VOICE_NAME:
+        cmd += ["-v", TTS_VOICE_NAME]
+
+    if TTS_RATE:
+        cmd += ["-r", str(TTS_RATE)]
+
+    cmd.append(text)
+
+    # print(f"[system say] {' '.join(shlex.quote(c) for c in cmd)}")
+
+    subprocess.run(cmd)
 
 
 def play_sequence(steps: List[PlayStep]) -> None:
@@ -66,13 +64,18 @@ def play_sequence(steps: List[PlayStep]) -> None:
             * If WAIT_FOR_USER_ON_THEIR_LINES:
                   wait for input("Press Enter when you've said your line...")
               else:
-                  maybe sleep for a fixed amount of time (optional)
+                  estimate a rough time based on line length and sleep
     """
-    engine = init_tts_engine()
+    engine = init_tts_engine()  # not used, but keeps interface consistent
+
+    print(f"Total steps: {len(steps)}")
+    print("Step types:", [step.type for step in steps])
 
     print("\n--- Starting scene ---\n")
 
-    for step in steps:
+    for idx, step in enumerate(steps):
+        # print(f"\n[play_sequence] Step {idx}: type={step.type}, character={step.character}")
+
         if step.type == "AI":
             speaker = step.character or "AI"
             print(f"{speaker}: {step.text}")
