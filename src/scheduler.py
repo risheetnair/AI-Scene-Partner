@@ -25,8 +25,8 @@ def build_sequence(lines: List[ScriptLine], my_character: str) -> List[PlayStep]
     steps: List[PlayStep] = []
     my_character = my_character.strip().upper()
     for line in lines:
-        line = line.character.strip().upper()
-        if line == my_character:
+        line_char_norm = line.character.strip().upper()
+        if line_char_norm == my_character:
             steps.append(PlayStep(type="YOU", text=line.text, character=line.character))
         else:
             steps.append(PlayStep(type="AI", text=line.text, character=line.character))
