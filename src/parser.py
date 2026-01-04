@@ -41,3 +41,34 @@ def parse_script(path: str) -> List[ScriptLine]:
                 continue
             lines.append(ScriptLine(character=name, text=text))
     return lines
+
+def parse_scene_text(scene_text: str) -> List[ScriptLine]:
+    """
+    Parse scene text from a textbox (Streamlit) into ScriptLine objects.
+
+    Expected format per line:
+        NAME: dialogue
+
+    Skips blank lines and comment lines starting with # or //
+    """
+    lines: List[ScriptLine] = []
+
+    for raw in scene_text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#") or line.startswith("//"):
+            continue
+        if ":" not in line:
+            continue
+
+        name_part, text_part = line.split(":", 1)
+        character = name_part.strip().upper()
+        text = text_part.strip()
+
+        if not character or not text:
+            continue
+
+        lines.append(ScriptLine(character=character, text=text))
+
+    return lines
